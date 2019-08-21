@@ -1,6 +1,7 @@
 package com.example.demo.consumer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -8,7 +9,6 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
-import org.apache.rocketmq.common.message.MessageQueue;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -46,17 +46,13 @@ public class ConsumerRegistry implements ApplicationContextAware, ApplicationRun
 
     }
 
-
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("regist");
-        consumerMap.forEach((tagName,messageConsumer)->{
-            try {
-                registry();
-            } catch (MQClientException e) {
-                e.printStackTrace();
-            }
-        });
+        try {
+            registry();
+        } catch (MQClientException e) {
+            e.printStackTrace();
+        }
     }
 
      private void registry() throws MQClientException {
@@ -72,18 +68,21 @@ public class ConsumerRegistry implements ApplicationContextAware, ApplicationRun
         // CONSUME_FROM_FIRST_OFFSET 从队列最开始开始消费，即历史消息（还储存在broker的）全部消费一遍
         // CONSUME_FROM_TIMESTAMP 从某个时间点开始消费，和setConsumeTimestamp()配合使用，默认是半个小时以前
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-
         // 监听所有tag
-        consumer.subscribe(topic, "hahahaha");
+        consumer.subscribe(topic, "*");
         // 开启内部类实现监听
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgList, ConsumeConcurrentlyContext context) {
-                MessageQueue messageQueue = context.getMessageQueue();
-                log.info("msgList {}",msgList);
-//                Consumer targetConsumer =  consumerMap.get(messageQueue.getTopic());
-//                targetConsumer.consume(targetConsumer.tageName());
-                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                MessageExt messageExt = msgList.get(0);
+                String tags =  messageExt.getTags();
+                Consumer targetConsumer =  consumerMap.get(tags);
+                if( targetConsumer.consume(SerializationUtils.deserialize(messageExt.getBody()))){
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                } else{
+                    return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+                }
+
             }
         });
         consumer.start();

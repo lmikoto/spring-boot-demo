@@ -18,7 +18,7 @@ mq:
     sendMsgTimeout: 3000
     #发送消息失败重试次数，默认2
     retryTimesWhenSendFailed: 2
-    topic: mqtest
+    topic: mq-test
   consumer:
     #该应用是否启用消费者
     isOnOff: on
@@ -26,7 +26,7 @@ mq:
     #mq的nameserver地址
     namesrvAddr: 127.0.0.1:9876
     #该消费者订阅的主题和tags("*"号表示订阅该主题下所有的tags),格式：topic~tag1||tag2||tag3;topic2~*;
-    topic: mqtest
+    topic: mq-test
     consumeThreadMin: 20
     consumeThreadMax: 64
     #设置一次消费消息的条数，默认为1条

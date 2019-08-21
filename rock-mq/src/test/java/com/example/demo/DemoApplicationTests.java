@@ -1,11 +1,10 @@
 package com.example.demo;
 
-import com.alibaba.fastjson.JSON;
+import com.example.demo.dto.A.ADto;
+import com.example.demo.dto.B.BDto;
+import com.example.demo.dto.tag.Tag;
 import com.example.demo.producer.MQProducer;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.common.message.Message;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,14 @@ public class DemoApplicationTests {
 
     @Test
     public void testDefaultRocketMQ() throws Exception {
-        Message message = new Message("mqtest", "hahahaha", "RocketMQ测试成功".getBytes());
-        // 不过要注意的是这个是异步的
-        producer.send(message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                log.info("传输成功");
-                log.info(JSON.toJSONString(sendResult));
-            }
-            @Override
-            public void onException(Throwable e) {
-                log.error("传输失败", e);
-            }
-        });
+        ADto aDto = new ADto();
+        aDto.setName("tester");
+        producer.send(Tag.SEND_A.tagName(),aDto);
+
+        BDto bDto = new BDto();
+        bDto.setAge(20);
+        producer.send(Tag.SEND_B.tagName(),bDto);
+
+        Thread.sleep(5000L);
     }
 }
