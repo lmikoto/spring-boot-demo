@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    username: root
+    password: anywhere
+    url: jdbc:mysql://127.0.0.1/activity?useSSL=false&characterEncoding=utf8&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+  activiti:
+    database-schema-update: true
