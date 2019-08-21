@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.consumer.test;
 
 import com.example.demo.consumer.Consumer;
 import org.springframework.stereotype.Component;

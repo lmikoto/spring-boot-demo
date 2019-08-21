@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.alibaba.fastjson.JSON;
+import com.example.demo.producer.MQProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -21,8 +22,7 @@ public class DemoApplicationTests {
 
     @Test
     public void testDefaultRocketMQ() throws Exception {
-        Message message = new Message("my_topic", "hahahaha", "RocketMQ测试成功".getBytes());
-        // 这里用到了这个mq的异步处理，类似ajax，可以得到发送到mq的情况，并做相应的处理
+        Message message = new Message("mqtest", "hahahaha", "RocketMQ测试成功".getBytes());
         // 不过要注意的是这个是异步的
         producer.send(message, new SendCallback() {
             @Override
